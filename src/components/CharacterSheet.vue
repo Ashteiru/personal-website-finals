@@ -31,8 +31,7 @@
         <div class="photo-container">
           <img :src="photoSrc" :alt="character.name" class="character-photo" />
           <div class="photo-overlay">
-            <p class="photo-instruction">Replace with your photo:</p>
-            <code>/public/assets/images/profile.jpg</code>
+            <p class="photo-instruction">I look good right??</p>
           </div>
         </div>
 
