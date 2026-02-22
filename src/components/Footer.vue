@@ -30,7 +30,7 @@
 
       <div class="copyright-section">
         <p>&copy; {{ currentYear }} Ashton Brian S. Garcia</p>
-        <p class="small">B.S. Computer Science Student • Asia Pacific College</p>
+        <p class="small">Information Technology Student • Asia Pacific College</p>
         <p class="version">Portfolio v1.0.0 • Build {{ buildNumber }}</p>
       </div>
     </div>

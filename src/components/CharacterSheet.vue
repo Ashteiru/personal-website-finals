@@ -99,12 +99,12 @@ export default {
         name: 'ASHTON BRIAN S. GARCIA',
         age: '20',
         sex: 'MALE',
-        role: 'Junior Full Stack Developer / IT Student',
+        role: 'Cybersecurity Specialist / IT Student',
         status: 'AVAILABLE FOR MISSIONS',
         experience: {
           total: '2 YEARS',
           specific: '1 YEAR',
-          roleType: 'WEB DEV EXPERIENCE'
+          roleType: 'CYBERSEC EXPERIENCE'
         },
         attributes: [
           { name: 'STRATEGY / SYSTEM THINKING', level: 7, description: 'Good' },
@@ -124,7 +124,6 @@ export default {
           { name: 'Mobile Development (Flutter)', percentage: 70 },
           { name: 'UI/UX Design (Responsive)', percentage: 82 },
           { name: 'Git / Version Control', percentage: 85 },
-          { name: 'Graph Theory Application', percentage: 78 },
           { name: 'Technical Documentation', percentage: 84 }
         ],
         perks: [
@@ -133,7 +132,7 @@ export default {
           { name: 'Vault Graduate', rank: 1 },
           { name: 'The Invincible Standard', rank: 2 },
           { name: 'Documentation is a Weapon', rank: 1 },
-          { name: 'Graph Theory Savant', rank: 3 }
+          { name: 'Cybersecurity Guardian', rank: 3 }
         ]
       }
     }
