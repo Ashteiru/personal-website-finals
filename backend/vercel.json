@@ -11,10 +11,5 @@
       "src": "/(.*)",
       "dest": "api/index.ts"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "SUPABASE_URL": "https://ysyqsnuomkszwrkqxaar.supabase.co",
-    "SUPABASE_KEY": "@supabase_service_key"
-  }
+  ]
 }
