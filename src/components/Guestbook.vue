@@ -71,12 +71,10 @@
 </template>
 
 <script>
-import { createClient } from '@supabase/supabase-js'
+import axios from 'axios'
 
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null
+// Get API URL from environment variables
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 export default {
   name: 'Guestbook',
@@ -101,21 +99,16 @@ export default {
   },
   methods: {
     async loadMessages() {
-      if (!supabase) {
-        this.messages = this.getMockMessages()
-        return
-      }
-
       this.isLoading = true
       try {
-        const { data, error } = await supabase
-          .from('guestbook')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(50)
-
-        if (error) throw error
-        this.messages = data || []
+        // GET request to NestJS backend
+        const response = await axios.get(`${API_URL}/api/guestbook`)
+        
+        if (response.data.success) {
+          this.messages = response.data.data || []
+        } else {
+          throw new Error('Failed to load messages')
+        }
       } catch (error) {
         console.error('Error loading messages:', error)
         this.messages = this.getMockMessages()
@@ -125,71 +118,44 @@ export default {
     },
 
     async submitMessage() {
-      if (!supabase) {
-        this.showMockSubmission()
-        return
-      }
-
       this.isSubmitting = true
       this.submitStatus = { type: '', message: '' }
 
       try {
-        const { error } = await supabase
-          .from('guestbook')
-          .insert([
-            {
-              name: this.newMessage.name,
-              email: this.newMessage.email || null,
-              message: this.newMessage.message
-            }
-          ])
+        // POST request to NestJS backend
+        const response = await axios.post(`${API_URL}/api/guestbook`, {
+          name: this.newMessage.name,
+          email: this.newMessage.email || null,
+          message: this.newMessage.message
+        })
 
-        if (error) throw error
+        if (response.data.success) {
+          this.submitStatus = {
+            type: 'success',
+            message: '✓ Message transmitted successfully!'
+          }
 
-        this.submitStatus = {
-          type: 'success',
-          message: '✓ Message transmitted successfully!'
+          // Clear form
+          this.newMessage = { name: '', email: '', message: '' }
+
+          // Reload messages
+          setTimeout(() => {
+            this.loadMessages()
+            this.submitStatus = { type: '', message: '' }
+          }, 2000)
+        } else {
+          throw new Error(response.data.message || 'Failed to submit message')
         }
-
-        // Clear form
-        this.newMessage = { name: '', email: '', message: '' }
-
-        // Reload messages
-        setTimeout(() => {
-          this.loadMessages()
-          this.submitStatus = { type: '', message: '' }
-        }, 2000)
 
       } catch (error) {
         console.error('Error submitting message:', error)
         this.submitStatus = {
           type: 'error',
-          message: '✗ Transmission failed. Please try again.'
+          message: error.response?.data?.message || '✗ Transmission failed. Please try again.'
         }
       } finally {
         this.isSubmitting = false
       }
-    },
-
-    showMockSubmission() {
-      this.isSubmitting = true
-      setTimeout(() => {
-        this.submitStatus = {
-          type: 'warning',
-          message: '⚠ DEMO MODE: Configure Supabase to enable real messages'
-        }
-        this.isSubmitting = false
-        
-        // Add mock message to list
-        this.messages.unshift({
-          id: Date.now(),
-          name: this.newMessage.name,
-          message: this.newMessage.message,
-          created_at: new Date().toISOString()
-        })
-        
-        this.newMessage = { name: '', email: '', message: '' }
-      }, 1000)
     },
 
     getMockMessages() {
