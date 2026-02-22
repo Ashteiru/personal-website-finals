@@ -1,0 +1,20 @@
+{
+  "name": "ashteiru-portfolio",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Fallout-style personal portfolio website with Vue.js and Supabase",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.21",
+    "@supabase/supabase-js": "^2.39.7",
+    "axios": "^1.6.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.1.5"
+  }
+}
