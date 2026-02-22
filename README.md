@@ -16,14 +16,7 @@ A **Fallout-inspired personal portfolio website** featuring a character sheet de
 - **REST API Backend** - NestJS server with GET/POST endpoints
 - **Responsive Design** - Optimized for mobile and desktop
 - **Modern Stack** - Vue.js 3, NestJS, Supabase
-
-### 🎯 Technical Requirements Met
-- ✅ Vue.js frontend hosted on Vercel
-- ✅ NestJS backend with REST API
-- ✅ Supabase database integration
-- ✅ GET and POST methods implemented
-- ✅ Mobile and desktop responsive
-- ✅ Working comments/guestbook functionality
+- 
 
 ## 🚀 Quick Start
 
