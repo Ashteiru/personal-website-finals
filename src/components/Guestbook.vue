@@ -100,18 +100,37 @@ export default {
   methods: {
     async loadMessages() {
       this.isLoading = true
+      this.submitStatus = { type: '', message: '' }
+      
       try {
+        console.log('📥 Loading messages from:', `${API_URL}/api/guestbook`)
+        
         // GET request to NestJS backend
         const response = await axios.get(`${API_URL}/api/guestbook`)
         
+        console.log('✓ Response received:', response.data)
+        
         if (response.data.success) {
           this.messages = response.data.data || []
+          console.log(`✓ Loaded ${this.messages.length} messages`)
         } else {
-          throw new Error('Failed to load messages')
+          throw new Error(response.data.message || 'Failed to load messages')
         }
       } catch (error) {
-        console.error('Error loading messages:', error)
-        this.messages = this.getMockMessages()
+        console.error('❌ Error loading messages:', error)
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        })
+        
+        this.messages = []
+        
+        const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
+        this.submitStatus = {
+          type: 'error',
+          message: `✗ Failed to load messages: ${errorMsg}`
+        }
       } finally {
         this.isLoading = false
       }
@@ -122,12 +141,21 @@ export default {
       this.submitStatus = { type: '', message: '' }
 
       try {
+        console.log('📤 Submitting message to:', `${API_URL}/api/guestbook`)
+        console.log('Message data:', { 
+          name: this.newMessage.name, 
+          hasEmail: !!this.newMessage.email,
+          messageLength: this.newMessage.message.length
+        })
+        
         // POST request to NestJS backend
         const response = await axios.post(`${API_URL}/api/guestbook`, {
           name: this.newMessage.name,
           email: this.newMessage.email || null,
           message: this.newMessage.message
         })
+
+        console.log('✓ Response received:', response.data)
 
         if (response.data.success) {
           this.submitStatus = {
@@ -148,31 +176,21 @@ export default {
         }
 
       } catch (error) {
-        console.error('Error submitting message:', error)
+        console.error('❌ Error submitting message:', error)
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        })
+        
+        const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
         this.submitStatus = {
           type: 'error',
-          message: error.response?.data?.message || '✗ Transmission failed. Please try again.'
+          message: `✗ Transmission failed: ${errorMsg}`
         }
       } finally {
         this.isSubmitting = false
       }
-    },
-
-    getMockMessages() {
-      return [
-        {
-          id: 1,
-          name: 'Vault Dweller',
-          message: 'Great portfolio! Love the Fallout theme!',
-          created_at: new Date(Date.now() - 86400000).toISOString()
-        },
-        {
-          id: 2,
-          name: 'Tech Recruiter',
-          message: 'Impressive skills! Would love to connect.',
-          created_at: new Date(Date.now() - 172800000).toISOString()
-        }
-      ]
     },
 
     formatDate(dateString) {

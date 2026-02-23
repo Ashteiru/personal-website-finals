@@ -17,12 +17,23 @@ export class GuestbookService {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_KEY;
 
+    console.log('🔧 Initializing Supabase connection...');
+    console.log(`SUPABASE_URL: ${supabaseUrl ? '✓ Set' : '✗ Missing'}`);
+    console.log(`SUPABASE_KEY: ${supabaseKey ? '✓ Set' : '✗ Missing'}`);
+
     if (!supabaseUrl || !supabaseKey) {
-      console.warn('⚠️  Supabase credentials not configured. Running in demo mode.');
-      this.supabase = null;
-    } else {
+      const error = 'CRITICAL ERROR: SUPABASE_URL and SUPABASE_KEY must be configured in environment variables';
+      console.error('❌', error);
+      throw new Error(error);
+    }
+
+    try {
       this.supabase = createClient(supabaseUrl, supabaseKey);
-      console.log('✓ Supabase client initialized');
+      console.log('✓ Supabase client initialized successfully');
+      console.log(`✓ Connected to: ${supabaseUrl}`);
+    } catch (error) {
+      console.error('❌ Failed to create Supabase client:', error);
+      throw new Error(`Supabase initialization failed: ${error.message}`);
     }
   }
 
@@ -31,81 +42,68 @@ export class GuestbookService {
    * Ordered by creation date (newest first)
    */
   async getMessages(): Promise<GuestbookMessage[]> {
-    if (!this.supabase) {
-      // Return mock data if Supabase is not configured
-      return this.getMockMessages();
+    console.log('📥 Fetching messages from Supabase...');
+    
+    try {
+      const { data, error } = await this.supabase
+        .from('guestbook')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (error) {
+        console.error('❌ Supabase query error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Failed to fetch messages: ${error.message} (Code: ${error.code})`);
+      }
+
+      console.log(`✓ Successfully fetched ${data?.length || 0} messages`);
+      return data || [];
+    } catch (error) {
+      console.error('❌ Exception while fetching messages:', error);
+      throw error;
     }
-
-    const { data, error } = await this.supabase
-      .from('guestbook')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100);
-
-    if (error) {
-      console.error('Supabase error:', error);
-      throw new Error(error.message);
-    }
-
-    return data || [];
   }
 
   /**
    * Create a new guestbook message
    */
   async createMessage(messageData: GuestbookMessage): Promise<GuestbookMessage> {
-    if (!this.supabase) {
-      // Return mock response if Supabase is not configured
-      return {
-        id: Date.now(),
-        ...messageData,
-        created_at: new Date().toISOString()
-      };
-    }
+    console.log('📤 Creating new message:', { name: messageData.name, hasEmail: !!messageData.email });
+    
+    try {
+      const { data, error } = await this.supabase
+        .from('guestbook')
+        .insert([
+          {
+            name: messageData.name,
+            email: messageData.email || null,
+            message: messageData.message
+          }
+        ])
+        .select()
+        .single();
 
-    const { data, error } = await this.supabase
-      .from('guestbook')
-      .insert([
-        {
-          name: messageData.name,
-          email: messageData.email || null,
-          message: messageData.message
-        }
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Supabase error:', error);
-      throw new Error(error.message);
-    }
-
-    return data;
-  }
-
-  /**
-   * Mock messages for demo mode
-   */
-  private getMockMessages(): GuestbookMessage[] {
-    return [
-      {
-        id: 1,
-        name: 'Vault Dweller',
-        message: 'Amazing Fallout-themed portfolio! Love the attention to detail.',
-        created_at: new Date(Date.now() - 86400000).toISOString()
-      },
-      {
-        id: 2,
-        name: 'Tech Recruiter',
-        message: 'Very impressive technical skills. Would love to connect!',
-        created_at: new Date(Date.now() - 172800000).toISOString()
-      },
-      {
-        id: 3,
-        name: 'Fellow Developer',
-        message: 'The Vue.js implementation is clean. Great work on the REST API integration!',
-        created_at: new Date(Date.now() - 259200000).toISOString()
+      if (error) {
+        console.error('❌ Supabase insert error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Failed to create message: ${error.message} (Code: ${error.code})`);
       }
-    ];
+
+      console.log('✓ Message created successfully with ID:', data?.id);
+      return data;
+    } catch (error) {
+      console.error('❌ Exception while creating message:', error);
+      throw error;
+    }
   }
+
 }

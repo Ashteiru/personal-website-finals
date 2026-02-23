@@ -35,9 +35,3 @@ WITH CHECK (true);
 -- Grant permissions
 GRANT ALL ON public.guestbook TO anon;
 GRANT ALL ON public.guestbook TO authenticated;
-
--- Insert some sample data (optional)
-INSERT INTO public.guestbook (name, email, message) VALUES
-  ('Vault Dweller', 'vault@example.com', 'Love the Fallout theme! Outstanding design!'),
-  ('Tech Enthusiast', null, 'Your Vue.js skills are impressive. Great work!'),
-  ('Recruiter', 'hr@techcorp.com', 'Would love to connect. Please check your email!');

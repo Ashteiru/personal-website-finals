@@ -18,18 +18,25 @@ export class GuestbookController {
   @Get()
   async getMessages() {
     try {
+      console.log('📥 GET /api/guestbook - Fetching messages...');
       const messages = await this.guestbookService.getMessages();
+      console.log(`✓ GET /api/guestbook - Returning ${messages.length} messages`);
       return {
         success: true,
         data: messages,
         count: messages.length
       };
     } catch (error) {
+      console.error('❌ GET /api/guestbook - Error:', {
+        message: error.message,
+        stack: error.stack
+      });
       throw new HttpException(
         {
           success: false,
-          message: 'Failed to fetch messages',
-          error: error.message
+          message: 'Failed to fetch messages from database',
+          error: error.message,
+          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
@@ -43,8 +50,11 @@ export class GuestbookController {
   @Post()
   async createMessage(@Body() createMessageDto: CreateMessageDto) {
     try {
+      console.log('📤 POST /api/guestbook - Validating message...');
+      
       // Validation
       if (!createMessageDto.name || !createMessageDto.message) {
+        console.warn('⚠️ Validation failed: Missing required fields');
         throw new HttpException(
           {
             success: false,
@@ -55,6 +65,7 @@ export class GuestbookController {
       }
 
       if (createMessageDto.name.length > 50) {
+        console.warn('⚠️ Validation failed: Name too long');
         throw new HttpException(
           {
             success: false,
@@ -65,6 +76,7 @@ export class GuestbookController {
       }
 
       if (createMessageDto.message.length > 500) {
+        console.warn('⚠️ Validation failed: Message too long');
         throw new HttpException(
           {
             success: false,
@@ -74,7 +86,9 @@ export class GuestbookController {
         );
       }
 
+      console.log('✓ Validation passed, creating message...');
       const newMessage = await this.guestbookService.createMessage(createMessageDto);
+      console.log(`✓ POST /api/guestbook - Message created successfully`);
       
       return {
         success: true,
@@ -86,11 +100,17 @@ export class GuestbookController {
         throw error;
       }
       
+      console.error('❌ POST /api/guestbook - Error:', {
+        message: error.message,
+        stack: error.stack
+      });
+      
       throw new HttpException(
         {
           success: false,
-          message: 'Failed to create message',
-          error: error.message
+          message: 'Failed to create message in database',
+          error: error.message,
+          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
