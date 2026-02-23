@@ -139,7 +139,18 @@ export default {
           errorMsg = `Cannot connect to backend at ${API_URL}. Backend may not be deployed or URL is incorrect.`
         } else {
           // Server responded with an error
-          errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
+          const serverError = error.response?.data
+          if (typeof serverError === 'string') {
+            errorMsg = serverError
+          } else if (serverError?.error) {
+            errorMsg = typeof serverError.error === 'string' ? serverError.error : JSON.stringify(serverError.error)
+          } else if (serverError?.message) {
+            errorMsg = typeof serverError.message === 'string' ? serverError.message : JSON.stringify(serverError.message)
+          } else if (error.message) {
+            errorMsg = error.message
+          } else {
+            errorMsg = JSON.stringify(serverError || error)
+          }
         }
         
         this.submitStatus = {
@@ -206,7 +217,18 @@ export default {
           errorMsg = `Cannot connect to backend at ${API_URL}. Backend may not be deployed or URL is incorrect.`
         } else {
           // Server responded with an error
-          errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
+          const serverError = error.response?.data
+          if (typeof serverError === 'string') {
+            errorMsg = serverError
+          } else if (serverError?.error) {
+            errorMsg = typeof serverError.error === 'string' ? serverError.error : JSON.stringify(serverError.error)
+          } else if (serverError?.message) {
+            errorMsg = typeof serverError.message === 'string' ? serverError.message : JSON.stringify(serverError.message)
+          } else if (error.message) {
+            errorMsg = error.message
+          } else {
+            errorMsg = JSON.stringify(serverError || error)
+          }
         }
         
         this.submitStatus = {
