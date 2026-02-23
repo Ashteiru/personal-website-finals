@@ -1,20 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../backend/src/app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
+import express, { Request, Response } from 'express';
 
-const server = express();
-let app;
+const expressApp = express();
+const adapter = new ExpressAdapter(expressApp);
 
-export default async (req, res) => {
-  if (!app) {
+let isAppInitialized = false;
+
+async function initializeApp() {
+  if (!isAppInitialized) {
     console.log('🚀 Initializing NestJS serverless function...');
-    app = await NestFactory.create(
-      AppModule,
-      new ExpressAdapter(server),
-    );
+    
+    const app = await NestFactory.create(AppModule, adapter, {
+      logger: ['error', 'warn', 'log'],
+    });
 
-    // Enable CORS
     app.enableCors({
       origin: process.env.FRONTEND_URL || '*',
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -22,8 +23,12 @@ export default async (req, res) => {
     });
 
     await app.init();
-    console.log('✓ NestJS app initialized');
+    isAppInitialized = true;
+    console.log('✓ NestJS app initialized successfully');
   }
+}
 
-  return server(req, res);
+export default async (req: Request, res: Response) => {
+  await initializeApp();
+  expressApp(req, res);
 };
