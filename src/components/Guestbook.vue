@@ -76,6 +76,11 @@ import axios from 'axios'
 // Get API URL from environment variables
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
+console.log('🔧 Guestbook Component Configuration:')
+console.log('  VITE_API_URL:', import.meta.env.VITE_API_URL)
+console.log('  Using API URL:', API_URL)
+console.log('  Mode:', import.meta.env.MODE)
+
 export default {
   name: 'Guestbook',
   data() {
@@ -121,15 +126,25 @@ export default {
         console.error('Error details:', {
           message: error.message,
           response: error.response?.data,
-          status: error.response?.status
+          status: error.response?.status,
+          code: error.code,
+          isNetworkError: !error.response
         })
         
         this.messages = []
         
-        const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
+        let errorMsg = ''
+        if (!error.response) {
+          // Network error - can't reach the server
+          errorMsg = `Cannot connect to backend at ${API_URL}. Backend may not be deployed or URL is incorrect.`
+        } else {
+          // Server responded with an error
+          errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
+        }
+        
         this.submitStatus = {
           type: 'error',
-          message: `✗ Failed to load messages: ${errorMsg}`
+          message: `✗ ${errorMsg}`
         }
       } finally {
         this.isLoading = false
@@ -180,13 +195,23 @@ export default {
         console.error('Error details:', {
           message: error.message,
           response: error.response?.data,
-          status: error.response?.status
+          status: error.response?.status,
+          code: error.code,
+          isNetworkError: !error.response
         })
         
-        const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
+        let errorMsg = ''
+        if (!error.response) {
+          // Network error - can't reach the server
+          errorMsg = `Cannot connect to backend at ${API_URL}. Backend may not be deployed or URL is incorrect.`
+        } else {
+          // Server responded with an error
+          errorMsg = error.response?.data?.error || error.response?.data?.message || error.message
+        }
+        
         this.submitStatus = {
           type: 'error',
-          message: `✗ Transmission failed: ${errorMsg}`
+          message: `✗ ${errorMsg}`
         }
       } finally {
         this.isSubmitting = false
